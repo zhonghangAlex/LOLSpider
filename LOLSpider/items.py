@@ -11,11 +11,13 @@ from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst
 
 
+# 获取账号所在的大区方法，并且进行数据格式化
 def get_play_area(value):
     list_area = value.split("/")
     return list_area[1] + "-" + list_area[2]
 
 
+# 抽取一个字符串中的整型数字
 def get_nums_int(value):
     match_re = re.match(".*?(\d+).*", value)
     if match_re:
@@ -25,6 +27,7 @@ def get_nums_int(value):
     return nums
 
 
+# 抽取一个字符串中的浮点型数字
 def get_nums_float(value):
     match_re = re.match(".*?(\d+)[.](\d+).*", value)
     if match_re:
@@ -34,24 +37,29 @@ def get_nums_float(value):
     return nums
 
 
+# 分段获取后半部分
 def get_back(value):
     str_no_blank = value.replace(' ', '')
     list_back = str_no_blank.split("：")[1]
     return list_back
 
 
+# 整型化
 def get_int(value):
     return int(value)
 
 
+# 浮点化
 def get_float(value):
     return float(value)
 
 
+# 获取账号等级
 def get_level(value):
     return value.split("级")[0]
 
 
+# 获取账号的单排段位
 def get_rank(value):
     return value.split("级")[1]
 
@@ -147,6 +155,7 @@ class LolItem(scrapy.Item):
 
     no_desc = scrapy.Field()
 
+    # 写入数据库，进行参数设置
     def get_insert_sql(self):
         insert_sql = """
             insert into no_info(no_title, url, url_object_id, play_area, total_times, total_hours,
@@ -186,4 +195,5 @@ class LolItem(scrapy.Item):
             self["no_desc"],
         )
 
+        # 交给pipline进行处理，此处只要传递参数过去即可
         return insert_sql, params

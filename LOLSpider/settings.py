@@ -54,6 +54,7 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
+# 中间件设置
 DOWNLOADER_MIDDLEWARES = {
    'LOLSpider.middlewares.RandomUserAgentMiddleware': 543,
    # 'LOLSpider.middlewares.RandomProxyMiddleware': 544,

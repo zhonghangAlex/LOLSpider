@@ -13,8 +13,10 @@ from LOLSpider.items import LolItem, LolItemLoader
 class LolSpider(scrapy.Spider):
     name = 'lol'
     # allowed_domains = ['www.zuhaowan.com']
+    # 开始执行的url
     start_urls = ['https://www.zuhaowan.com/zuhao-17']
 
+    # 默认请求头
     headers = {
         "HOST": "www.baidu.com",
         "Referer": "https://www.baidu.com",
@@ -31,17 +33,21 @@ class LolSpider(scrapy.Spider):
         self.crawler.stats.set_value("failed_urls", ",".join(self.fail_urls))
 
     def parse(self, response):
+        # 404处理
         if response.status == 404:
             self.fail_urls.append(response.url)
             self.crawler.stats.inc_value("failed_url")
 
+        # 爬取主页面
         web_nodes = response.css("#AccountList tr td:nth-child(1) a")
         for web_node in web_nodes:
             image_url = web_node.css("img::attr(src)").extract_first("")
             web_url = web_node.css("::attr(href)").extract_first("")
             title = web_node.css("::attr(title)").extract_first("")
+            # 下载详情页
             yield Request(url=parse.urljoin(response.url, web_url), meta={"front_image_url": image_url, "no_title": title}, callback=self.parse_detail)
 
+        # 自动跳转主页面的下一页
         next_url = response.css(".goods_wrap .Main_left_bottom .od_page .pages .next::attr(href)").extract_first("")
         if next_url:
             yield Request(url=parse.urljoin(response.url, next_url), callback=self.parse)
@@ -53,6 +59,7 @@ class LolSpider(scrapy.Spider):
         no_title = response.meta.get("no_title", "")
         item_loader = LolItemLoader(item=LolItem(), response=response)
 
+        # 使用itemloader进行数据获取
         item_loader.add_value("no_title", no_title)
         item_loader.add_value("url", response.url)
         item_loader.add_value("url_object_id", get_md5(response.url))
